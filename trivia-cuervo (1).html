@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRIVIA CUERVA · San Lorenzo de Almagro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=Bebas+Neue&family=Oswald:wght@300;400;600&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --azul:#0c2c6b; --azul-dark:#071a44; --rojo:#c8102e; --rojo-dark:#8a0a20;
+    --gold:#eef1f6; --gold-deep:#aab2c4; --cream:#f6ecd2; --ink:#1a140d;
+    --night:#160f24; --night2:#221634;
+    --ok:#2faa55; --bad:#d23b3b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Oswald', sans-serif; color:var(--cream);
+    min-height:100vh; overflow-x:hidden;
+    background:
+      radial-gradient(ellipse 60% 45% at 50% 8%, rgba(238,241,246,.18), transparent 60%),
+      radial-gradient(ellipse 90% 60% at 50% 120%, rgba(200,16,46,.20), transparent 60%),
+      linear-gradient(160deg, var(--night) 0%, var(--azul-dark) 60%, #0a0716 100%);
+    display:flex; align-items:center; justify-content:center; padding:18px;
+  }
+  /* fileteado-ish ornament background */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; opacity:.06; z-index:0;
+    background-image:
+      repeating-linear-gradient(45deg, var(--gold) 0 1px, transparent 1px 22px),
+      repeating-linear-gradient(-45deg, var(--gold) 0 1px, transparent 1px 22px);
+  }
+  .wrap{position:relative; z-index:1; width:min(960px, 100%);}
+
+  /* ---- shared card ---- */
+  .panel{
+    background:
+      linear-gradient(180deg, rgba(246,236,210,.04), rgba(0,0,0,.18)),
+      linear-gradient(180deg, var(--azul) 0%, var(--azul-dark) 100%);
+    border:3px solid var(--gold-deep);
+    border-radius:18px;
+    box-shadow:0 0 0 4px rgba(0,0,0,.4), 0 22px 60px rgba(0,0,0,.6), inset 0 0 40px rgba(0,0,0,.35);
+    padding:26px 24px; position:relative;
+  }
+  .panel::after{ /* inner gold hairline */
+    content:""; position:absolute; inset:7px; border:1px solid rgba(238,241,246,.4);
+    border-radius:12px; pointer-events:none;
+  }
+  .screen{display:none;}
+  .screen.on{display:block; animation:pop .35s cubic-bezier(.2,.9,.3,1.3);}
+  @keyframes pop{from{opacity:0; transform:translateY(14px) scale(.98)} to{opacity:1; transform:none}}
+
+  /* ---- header crest ---- */
+  .crest{
+    width:74px; height:84px; margin:0 auto 6px; display:block; filter:drop-shadow(0 4px 6px rgba(0,0,0,.5));
+  }
+  h1{
+    font-family:'Yeseva One', serif; text-align:center; line-height:1.05;
+    font-size:clamp(30px,6.4vw,56px); color:var(--cream);
+    text-shadow:0 2px 0 var(--rojo-dark), 0 0 18px rgba(238,241,246,.35);
+    letter-spacing:1px;
+  }
+  h1 .azulgrana{
+    background:linear-gradient(90deg, #6ea0ff, #fff 50%, #ff7a8a);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .tagline{font-family:'Pacifico', cursive; text-align:center; color:var(--gold);
+    font-size:clamp(15px,2.6vw,22px); margin-top:4px; text-shadow:0 2px 6px rgba(0,0,0,.6);}
+  .rule{height:3px; width:70%; margin:16px auto; border-radius:3px;
+    background:linear-gradient(90deg, transparent, var(--gold-deep), var(--gold), var(--gold-deep), transparent);}
+
+  .lead{font-size:clamp(14px,2.2vw,17px); text-align:center; color:#dfe6ff; font-weight:300; line-height:1.7; max-width:640px; margin:0 auto;}
+  .small{font-size:12px; color:#a9b3da; text-align:center; letter-spacing:1px;}
+
+  /* ---- inputs / buttons ---- */
+  .field{display:flex; flex-direction:column; gap:8px; max-width:380px; margin:20px auto 8px;}
+  .field label{font-family:'Bebas Neue'; letter-spacing:2px; font-size:18px; color:var(--gold);}
+  input[type=text]{
+    font-family:'Oswald'; font-size:18px; padding:13px 15px; border-radius:10px;
+    border:2px solid var(--gold-deep); background:#0a1838; color:#fff; outline:none;
+    box-shadow:inset 0 2px 8px rgba(0,0,0,.5); text-align:center;
+  }
+  input[type=text]:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(238,241,246,.25), inset 0 2px 8px rgba(0,0,0,.5);}
+
+  .btn{
+    font-family:'Bebas Neue'; letter-spacing:2px; font-size:clamp(18px,2.6vw,24px);
+    cursor:pointer; border:none; padding:14px 30px; border-radius:12px; color:#1a140d;
+    background:linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+    box-shadow:0 6px 0 #8f96a6, 0 10px 20px rgba(0,0,0,.5);
+    transition:transform .06s, box-shadow .06s, filter .15s; display:inline-block;
+  }
+  .btn:hover{filter:brightness(1.07);}
+  .btn:active{transform:translateY(5px); box-shadow:0 1px 0 #8f96a6;}
+  .btn.red{background:linear-gradient(180deg, #e84258, var(--rojo)); color:#fff; box-shadow:0 6px 0 var(--rojo-dark), 0 10px 20px rgba(0,0,0,.5);}
+  .btn.red:active{box-shadow:0 1px 0 var(--rojo-dark);}
+  .btn.ghost{background:transparent; color:var(--gold); border:2px solid var(--gold-deep); box-shadow:none;}
+  .btn:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:0 6px 0 #555;}
+  .center{text-align:center; margin-top:22px;}
+
+  /* ---- roulette ---- */
+  .wheel-stage{display:flex; flex-direction:column; align-items:center; gap:14px; margin-top:8px;}
+  .wheel-box{position:relative; width:min(78vw,300px); height:min(78vw,300px);}
+  .pointer{
+    position:absolute; top:-6px; left:50%; transform:translateX(-50%); z-index:3;
+    width:0; height:0; border-left:16px solid transparent; border-right:16px solid transparent;
+    border-top:26px solid var(--gold); filter:drop-shadow(0 3px 3px rgba(0,0,0,.6));
+  }
+  .wheel{
+    width:100%; height:100%; border-radius:50%; position:relative;
+    border:8px solid var(--gold-deep);
+    box-shadow:0 0 0 6px var(--azul-dark), 0 14px 40px rgba(0,0,0,.6), inset 0 0 30px rgba(0,0,0,.4);
+    background:conic-gradient(
+      var(--azul) 0deg 120deg,
+      var(--rojo) 120deg 240deg,
+      var(--gold-deep) 240deg 360deg);
+    transition:transform 3.1s cubic-bezier(.12,.62,.12,1);
+  }
+  .wheel::before{ /* sheen */
+    content:""; position:absolute; inset:0; border-radius:50%; z-index:1; pointer-events:none;
+    background:radial-gradient(circle at 36% 28%, rgba(255,255,255,.40), rgba(255,255,255,0) 46%);
+  }
+  .wheel::after{ /* sector dividers */
+    content:""; position:absolute; inset:0; border-radius:50%; z-index:1; pointer-events:none;
+    background:repeating-conic-gradient(from -1.2deg, rgba(0,0,0,.5) 0 2.4deg, transparent 2.4deg 120deg);
+  }
+  .wheel .hub{
+    position:absolute; top:50%; left:50%; width:66px; height:66px; transform:translate(-50%,-50%);
+    border-radius:50%; background:radial-gradient(circle at 38% 30%, #ffffff, #e9edf4 58%, #c2c8d4);
+    border:4px solid var(--azul-dark); z-index:3; display:grid; place-items:center;
+    box-shadow:0 4px 12px rgba(0,0,0,.55), inset 0 1px 3px rgba(255,255,255,.8);
+  }
+  .wheel .hub svg{width:34px; height:40px;}
+  .seg-ico{
+    position:absolute; top:50%; left:50%; width:46px; height:46px; z-index:2; pointer-events:none;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.6));
+  }
+  .seg-ico svg{width:100%; height:100%; display:block;}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; justify-content:center; font-size:13px; color:#dfe6ff;}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .dot{width:13px; height:13px; border-radius:50%; border:1px solid rgba(0,0,0,.4);}
+  .spin-result{font-family:'Yeseva One'; font-size:clamp(20px,4vw,30px); color:var(--gold); text-align:center; min-height:38px; text-shadow:0 2px 8px rgba(0,0,0,.6);}
+
+  /* ---- HUD ---- */
+  .hud{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;}
+  .hud .who{font-family:'Bebas Neue'; letter-spacing:1.5px; font-size:20px; color:var(--gold); display:flex; align-items:center; gap:8px;}
+  .lives{display:inline-flex; gap:5px; align-items:center;}
+  .lives svg{display:block;}
+  .theme-chip{font-family:'Bebas Neue'; letter-spacing:1px; font-size:16px; padding:5px 14px; border-radius:20px; border:2px solid var(--gold-deep); color:#fff; background:rgba(0,0,0,.3);}
+
+  .quizgrid{display:grid; grid-template-columns:1fr 230px; gap:18px;}
+  @media (max-width:720px){ .quizgrid{grid-template-columns:1fr;} .ladder{order:-1;} }
+
+  .qcard{background:linear-gradient(180deg, rgba(246,236,210,.97), #efe2c2); color:var(--ink);
+    border-radius:14px; padding:20px; border:2px solid var(--gold-deep); box-shadow:inset 0 0 24px rgba(120,130,150,.18);}
+  .qnum{font-family:'Bebas Neue'; letter-spacing:2px; color:var(--rojo); font-size:16px;}
+  .qtext{font-size:clamp(17px,2.5vw,22px); font-weight:600; line-height:1.35; margin:6px 0 16px; color:#241a10;}
+  .options{display:grid; gap:11px;}
+  .opt{
+    font-family:'Oswald'; font-size:clamp(15px,2.2vw,18px); text-align:left; cursor:pointer;
+    padding:13px 16px; border-radius:11px; border:2px solid #b3bbcb;
+    background:linear-gradient(180deg, #fff, #f3e7c7); color:#241a10; transition:transform .07s, background .15s, border-color .15s;
+    display:flex; gap:10px; align-items:center;
+  }
+  .opt .ki{font-family:'Bebas Neue'; background:var(--azul); color:#fff; width:26px; height:26px; min-width:26px; border-radius:6px; display:grid; place-items:center; font-size:16px;}
+  .opt:hover:not(:disabled){transform:translateX(3px); border-color:var(--gold);}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:linear-gradient(180deg,#7fe39a,#3fb866); border-color:#1f7a3d; color:#08210f; font-weight:600;}
+  .opt.wrong{background:linear-gradient(180deg,#f59a9a,#e15252); border-color:#9a1f1f; color:#2a0808;}
+  .opt.dimmed{opacity:.32; filter:grayscale(.6);}
+
+  .tools{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; align-items:center;}
+  .feedback{min-height:24px; font-family:'Bebas Neue'; letter-spacing:1px; font-size:18px; margin-top:10px;}
+
+  /* ladder */
+  .ladder{background:rgba(0,0,0,.25); border:2px solid var(--gold-deep); border-radius:14px; padding:14px;}
+  .ladder h3{font-family:'Bebas Neue'; letter-spacing:2px; color:var(--gold); font-size:18px; text-align:center; margin-bottom:10px;}
+  .step{display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:8px; font-size:13.5px; color:#c7cff0; opacity:.55; transition:.2s;}
+  .step .n{font-family:'Bebas Neue'; width:20px; text-align:center; color:var(--gold-deep);}
+  .step.done{opacity:1; color:#bfe6c8;}
+  .step.done .n{color:var(--ok);}
+  .step.cur{opacity:1; background:linear-gradient(90deg, rgba(238,241,246,.25), transparent); color:#fff; box-shadow:inset 0 0 0 1px rgba(238,241,246,.4);}
+  .step.cur .n{color:var(--gold);}
+
+  /* mute */
+  .mute{position:fixed; top:14px; right:14px; z-index:20; font-family:'Bebas Neue'; letter-spacing:1px;
+    font-size:14px; cursor:pointer; background:rgba(0,0,0,.45); color:var(--gold); border:2px solid var(--gold-deep);
+    border-radius:30px; padding:7px 14px;}
+
+  /* end screen */
+  .endbig{font-family:'Yeseva One'; text-align:center; font-size:clamp(28px,6vw,52px); line-height:1.1;}
+  .endlevel{font-family:'Bebas Neue'; letter-spacing:2px; text-align:center; font-size:clamp(22px,4.4vw,34px); color:var(--gold); margin-top:8px;}
+  .endstats{text-align:center; color:#cdd6f5; margin:14px 0; font-size:15px; line-height:1.7;}
+  @keyframes confetti{to{transform:translateY(110vh) rotate(720deg);}}
+  .conf{position:fixed; top:-20px; width:9px; height:14px; z-index:30; pointer-events:none; animation:confetti linear forwards;}
+
+  .levelup{
+    position:fixed; inset:0; display:none; place-items:center; z-index:40; pointer-events:none;
+  }
+  .levelup.on{display:grid; animation:fade .3s;}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .levelup .lu{font-family:'Yeseva One'; text-align:center; background:rgba(8,5,18,.78); padding:24px 34px; border-radius:18px; border:3px solid var(--gold); box-shadow:0 0 40px rgba(238,241,246,.4);}
+  .levelup .lu small{font-family:'Bebas Neue'; letter-spacing:3px; color:var(--gold); font-size:20px; display:block;}
+  .levelup .lu b{font-size:clamp(26px,6vw,42px); color:#fff; display:block; margin-top:6px;}
+  .pulse{animation:pulse .6s ease;}
+  @keyframes pulse{0%{transform:scale(.6); opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="mute" id="muteBtn">TANGO: ON</div>
+<div class="wrap">
+
+  <!-- ============ HOME ============ -->
+  <section class="screen on panel" id="home">
+    <svg class="crest" viewBox="0 0 74 84"><use href="#shield"/></svg>
+    <h1>TRIVIA <span class="azulgrana">San Lorenzo</span></h1>
+    <div class="tagline">~ del barrio de Boedo ~</div>
+    <div class="rule"></div>
+    <p class="lead">Trivia azulgrana sobre el <b>Ciclón de Boedo</b>. <br>Respondé y escalá hasta ser <b>Campeón del Mundo</b>. <br>Tenés tolerancia de 1 error y un salvataje 50/50.<br>¡Aguante San Lorenzo!</p>
+    <div class="field">
+      <label for="pname">¿Cómo te llamás, hincha?</label>
+      <input type="text" id="pname" maxlength="22" placeholder="Tu nombre de jugador" autocomplete="off">
+    </div>
+    <div class="center">
+      <button class="btn red" id="startBtn">¡A LA CANCHA!</button>
+    </div>
+    <p class="small" style="margin-top:18px;">Música tango/murga · clic en cualquier lado activa el sonido</p>
+  </section>
+
+  <!-- ============ ROULETTE ============ -->
+  <section class="screen panel" id="roulette">
+    <div class="hud">
+      <div class="who"><svg class="crest" style="width:26px;height:30px;margin:0" viewBox="0 0 74 84"><use href="#shield"/></svg><span id="ruWho">—</span></div>
+      <div class="lives" id="ruLives"></div>
+    </div>
+    <h1 style="font-size:clamp(22px,4.4vw,34px)">LA RULETA DEL CICLÓN</h1>
+    <div class="wheel-stage">
+      <div class="wheel-box">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel">
+          <div class="hub"><svg viewBox="0 0 74 84"><use href="#shield"/></svg></div>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--azul)"></i>Resultados</span>
+        <span><i class="dot" style="background:var(--rojo)"></i>Jugadores</span>
+        <span><i class="dot" style="background:var(--gold-deep)"></i>Historia</span>
+      </div>
+      <div class="spin-result" id="spinResult">Girá para sortear la temática</div>
+      <button class="btn" id="spinBtn">GIRAR LA RULETA</button>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section class="screen panel" id="quiz">
+    <div class="hud">
+      <div class="who"><svg class="crest" style="width:26px;height:30px;margin:0" viewBox="0 0 74 84"><use href="#shield"/></svg><span id="qWho">—</span></div>
+      <div class="theme-chip" id="qTheme">—</div>
+      <div class="lives" id="qLives"></div>
+    </div>
+    <div class="quizgrid">
+      <div>
+        <div class="qcard">
+          <div class="qnum" id="qNum">NIVEL 1 · EQUIPO DE RESERVA</div>
+          <div class="qtext" id="qText">…</div>
+          <div class="options" id="qOptions"></div>
+        </div>
+        <div class="tools">
+          <button class="btn ghost" id="fiftyBtn">SALVATAJE 50/50</button>
+          <span class="feedback" id="qFeedback"></span>
+        </div>
+      </div>
+      <aside class="ladder">
+        <h3>★ ESCALAFÓN ★</h3>
+        <div id="ladderList"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ END ============ -->
+  <section class="screen panel" id="end">
+    <svg class="crest" viewBox="0 0 74 84"><use href="#shield"/></svg>
+    <div class="endbig" id="endTitle">—</div>
+    <div class="endlevel" id="endLevel">—</div>
+    <div class="rule"></div>
+    <div class="endstats" id="endStats">—</div>
+    <div class="center" style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+      <button class="btn" id="downloadBtn">DESCARGAR DIPLOMA</button>
+      <button class="btn red" id="againBtn">JUGAR DE NUEVO</button>
+    </div>
+    <p class="small" style="margin-top:16px;">Compartí tu diploma cuervo</p>
+  </section>
+
+</div>
+
+<!-- crest definition -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="shield" viewBox="0 0 74 84">
+    <path d="M37 2 L70 12 V44 C70 64 55 76 37 82 C19 76 4 64 4 44 V12 Z" fill="#0c2c6b" stroke="#eef1f6" stroke-width="3"/>
+    <path d="M37 2 L70 12 V44 C70 64 55 76 37 82 Z" fill="#c8102e"/>
+    <path d="M37 2 L70 12 V44 C70 64 55 76 37 82 C19 76 4 64 4 44 V12 Z" fill="none" stroke="#eef1f6" stroke-width="3"/>
+    <text x="37" y="50" font-family="Bebas Neue, sans-serif" font-size="30" fill="#f6ecd2" text-anchor="middle" font-weight="bold">SL</text>
+  </symbol>
+</defs></svg>
+
+<div class="levelup" id="levelup"><div class="lu pulse"><small id="luSmall">¡SUBISTE DE NIVEL!</small><b id="luBig">—</b></div></div>
+
+<script>
+(()=>{
+"use strict";
+
+/* ====================== DATA ====================== */
+const LEVELS = [
+  "Equipo de reserva","Suplente en primera","Titular en primera",
+  "Finalista de liga","Campeón de liga","Campeón Copa Argentina",
+  "Campeón Sudamericana","Campeón Libertadores","Campeón del Mundo"
+];
+const THEMES = { RES:"Resultados", JUG:"Jugadores", HIS:"Historia" };
+const THEME_ORDER = ["RES","JUG","HIS"]; // matches wheel sectors 0,1,2
+
+// q: question, o: options (index 0 is the CORRECT one — shuffled at runtime), d: difficulty 1-9, t: theme
+const BANK = [
+  // ---- RESULTADOS ----
+  {t:"RES",d:1,q:"¿Contra qué equipo definió San Lorenzo la final de la Copa Libertadores 2014?",o:["Nacional (Paraguay)","Real Madrid","Atlético Nacional","Peñarol"]},
+  {t:"RES",d:2,q:"¿Qué equipo le ganó a San Lorenzo la final del Mundial de Clubes 2014?",o:["Real Madrid","Barcelona","Bayern Múnich","Auckland City"]},
+  {t:"RES",d:3,q:"¿Cuál fue el marcador de la final del Mundial de Clubes 2014 (Real Madrid–San Lorenzo)?",o:["2 a 0","1 a 0","3 a 1","2 a 1"]},
+  {t:"RES",d:4,q:"Tras ganar la Libertadores 2014, ¿a qué torneo clasificó San Lorenzo?",o:["Mundial de Clubes 2014","Recopa 2014","Copa Argentina","Supercopa de España"]},
+  {t:"RES",d:5,q:"¿A qué rival venció San Lorenzo en la final de la Copa Sudamericana 2002?",o:["Atlético Nacional (Colombia)","Racing","Peñarol","Cruzeiro"]},
+  {t:"RES",d:6,q:"¿Con qué resultado global ganó San Lorenzo la final de la Libertadores 2014?",o:["2 a 1","1 a 0","3 a 2","4 a 0"]},
+  {t:"RES",d:7,q:"En la semifinal de la Libertadores 2014, San Lorenzo goleó en Boedo a Bolívar por…",o:["5 a 0","2 a 0","3 a 1","4 a 2"]},
+  {t:"RES",d:8,q:"¿Con qué global se consagró San Lorenzo en la final de la Sudamericana 2002?",o:["4 a 0","2 a 0","3 a 1","1 a 0"]},
+  {t:"RES",d:9,q:"¿Quiénes marcaron los goles del Real Madrid en la final 2014 ante San Lorenzo?",o:["Sergio Ramos y Bale","Cristiano y Benzema","Isco y Kroos","Bale y Modric"]},
+
+  // ---- JUGADORES ----
+  {t:"JUG",d:1,q:"¿Quién es el máximo goleador histórico de San Lorenzo?",o:["José Sanfilippo","Leandro Romagnoli","Héctor Scotta","Bernardo Romeo"]},
+  {t:"JUG",d:2,q:"¿Qué capitán levantó la Copa Libertadores 2014?",o:["Leandro 'Pipi' Romagnoli","Néstor Ortigoza","Julio Buffarini","Juan Mercier"]},
+  {t:"JUG",d:3,q:"¿Cómo le decían a José Sanfilippo, el goleador histórico?",o:["El Nene","El Beto","El Pipi","El Gringo"]},
+  {t:"JUG",d:4,q:"¿Qué juvenil surgido de San Lorenzo brilló luego en el Atlético de Madrid y la Selección?",o:["Ángel Correa","Lautaro Martínez","Paulo Dybala","Giovani Lo Celso"]},
+  {t:"JUG",d:5,q:"¿Quién convirtió el penal decisivo en la final de la Libertadores 2014?",o:["Néstor Ortigoza","Leandro Romagnoli","Mauro Matos","Ángel Correa"]},
+  {t:"JUG",d:6,q:"¿Quién es el jugador con más partidos en la historia del club?",o:["Sergio Villar","José Sanfilippo","Roberto Telch","Leandro Romagnoli"]},
+  {t:"JUG",d:7,q:"¿Cuál es el jugador MÁS ganador (6 títulos) en la historia de San Lorenzo?",o:["Leandro Romagnoli","José Sanfilippo","Roberto Telch","Bernardo Romeo"]},
+  {t:"JUG",d:8,q:"¿Qué DT dirigió a San Lorenzo campeón de la Libertadores 2014?",o:["Edgardo Bauza","Juan Antonio Pizzi","Rubén Insúa","Manuel Pellegrini"]},
+  {t:"JUG",d:9,q:"El arquero apodado 'Batman', figura de Los Matadores, era…",o:["Agustín Cejas","Carlos Saja","Sebastián Torrico","Pablo Migliore"]},
+
+  // ---- HISTORIA ----
+  {t:"HIS",d:1,q:"¿En qué año fue fundado San Lorenzo de Almagro?",o:["1908","1901","1910","1912"]},
+  {t:"HIS",d:2,q:"¿Quién fue el fundador del club?",o:["El Padre Lorenzo Massa","Pedro Bidegain","Carlos Bidegain","Antonio Scaramusso"]},
+  {t:"HIS",d:3,q:"¿Por qué a San Lorenzo le dicen 'los Cuervos'?",o:["Por la sotana negra del cura fundador","Por el color del escudo","Por un apodo del barrio","Por la hinchada"]},
+  {t:"HIS",d:4,q:"¿Cuál es el clásico rival de San Lorenzo?",o:["Huracán","Boca Juniors","Independiente","Vélez"]},
+  {t:"HIS",d:5,q:"¿Con qué barrio porteño se identifica San Lorenzo?",o:["Boedo","La Boca","Núñez","Liniers"]},
+  {t:"HIS",d:6,q:"¿Cómo se llama el estadio actual de San Lorenzo?",o:["Pedro Bidegain (Nuevo Gasómetro)","El Cilindro","La Bombonera","El Monumental"]},
+  {t:"HIS",d:7,q:"Antes de llamarse San Lorenzo, ¿qué nombre tenía el grupo de pibes?",o:["Los Forzosos de Almagro","Los Matadores","Los Carasucias","Los Santos de Boedo"]},
+  {t:"HIS",d:8,q:"¿Cuál fue el PRIMER título internacional de San Lorenzo?",o:["Copa Mercosur 2001","Copa Sudamericana 2002","Copa Libertadores 2014","Recopa 2015"]},
+  {t:"HIS",d:9,q:"¿Qué célebre hincha fue el socio N° 88.235 del club?",o:["El Papa Francisco","Diego Maradona","Alberto Olmedo","Sandro"]},
+];
+
+/* ====================== STATE ====================== */
+let S = null;
+function fresh(name){
+  return { name:name||"Hincha", correct:0, lives:2, used:new Set(), fifty:true,
+           theme:null, q:null, answered:false, wheelRot:0 };
+}
+
+/* ====================== DOM ====================== */
+const $ = id => document.getElementById(id);
+const screens = { home:$("home"), roulette:$("roulette"), quiz:$("quiz"), end:$("end") };
+function show(name){ Object.entries(screens).forEach(([k,el])=>el.classList.toggle("on", k===name)); }
+
+/* ====================== AUDIO (tango + murga, Web Audio) ====================== */
+const Audio = (()=>{
+  let ac=null, on=true, musicTimer=null, nextTime=0, step=0, master=null;
+  function ctx(){ if(!ac){ try{ ac=new (window.AudioContext||window.webkitAudioContext)(); master=ac.createGain(); master.gain.value=0.5; master.connect(ac.destination);}catch(e){} } if(ac&&ac.state==='suspended') ac.resume(); return ac; }
+  // chord tables (Hz) — A minor tango vibe
+  const Am=[220.00,261.63,329.63], Dm=[233.08,293.66,349.23,440], E7=[164.81,329.63,415.30,246.94], F=[174.61,261.63,349.23];
+  const BASS={Am:110.0,Dm:146.83,E7:164.81,F:174.61};
+  const PROG=["Am","Am","Dm","E7","Am","F","Dm","E7"]; // 8 bars
+  const CH={Am,Dm,E7,F};
+  const BPM=100, beat=60/BPM;       // quarter
+  const stepDur=beat;               // one stab per beat (marcato in 4 -> we use 4 stabs/bar via subdiv)
+  function stab(freqs, t, dur, vol, type){
+    const a=ctx(); if(!a) return;
+    const g=a.createGain(); g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(vol,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    const f=a.createBiquadFilter(); f.type='lowpass'; f.frequency.value=1700; f.Q.value=0.7;
+    g.connect(f); f.connect(master);
+    freqs.forEach(fr=>{ const o=a.createOscillator(); o.type=type||'sawtooth'; o.frequency.value=fr; const d=a.createOscillator(); o.connect(g); o.start(t); o.stop(t+dur+0.03); });
+  }
+  function bass(fr,t){ const a=ctx(); if(!a) return; const o=a.createOscillator(),g=a.createGain(); o.type='triangle'; o.frequency.value=fr; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.22,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.55); }
+  function bombo(t){ const a=ctx(); if(!a) return; const o=a.createOscillator(),g=a.createGain(); o.type='sine'; o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(55,t+0.18); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.3,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.22); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.25); }
+  function schedule(){
+    const a=ctx(); if(!a) return;
+    while(nextTime < a.currentTime + 0.2){
+      const bar=Math.floor(step/4)%PROG.length, b=step%4;
+      const ch=PROG[bar], chord=CH[ch];
+      // marcato: stab on every beat, bass on 1 & 3, bombo (murga) on 2 & 4 lightly
+      stab(chord, nextTime, b===0?0.32:0.18, b===0?0.14:0.09, 'sawtooth');
+      if(b===0||b===2) bass(BASS[ch], nextTime);
+      if(b===1||b===3) bombo(nextTime);
+      nextTime += stepDur; step++;
+    }
+    musicTimer=setTimeout(schedule,50);
+  }
+  return {
+    startMusic(){ if(!on) return; const a=ctx(); if(!a||musicTimer) return; nextTime=a.currentTime+0.1; step=0; schedule(); },
+    stopMusic(){ if(musicTimer){clearTimeout(musicTimer); musicTimer=null;} },
+    toggle(){ on=!on; if(on) this.startMusic(); else this.stopMusic(); return on; },
+    isOn(){ return on; },
+    // SFX
+    correct(){ const a=ctx(); if(!a) return; [523,659,784].forEach((f,i)=>this._beep(f,a.currentTime+i*0.08,0.12,'square',0.16)); bombo(a.currentTime); },
+    wrong(){ const a=ctx(); if(!a) return; this._beep(196,a.currentTime,0.35,'sawtooth',0.18); this._beep(146,a.currentTime+0.12,0.4,'sawtooth',0.15); },
+    spin(){ const a=ctx(); if(!a) return; this._beep(880,a.currentTime,0.05,'square',0.08); },
+    levelup(){ const a=ctx(); if(!a) return; [392,523,659,784,1047].forEach((f,i)=>this._beep(f,a.currentTime+i*0.09,0.16,'square',0.16)); },
+    win(){ const a=ctx(); if(!a) return; [523,659,784,1047,1318,1047,1318].forEach((f,i)=>this._beep(f,a.currentTime+i*0.13,0.2,'square',0.17)); },
+    lose(){ const a=ctx(); if(!a) return; [392,330,262,196].forEach((f,i)=>this._beep(f,a.currentTime+i*0.18,0.3,'triangle',0.16)); },
+    _beep(fr,t,dur,type,vol){ const a=ctx(); if(!a) return; const o=a.createOscillator(),g=a.createGain(); o.type=type; o.frequency.value=fr; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g); g.connect(master||a.destination); o.start(t); o.stop(t+dur+0.02); }
+  };
+})();
+
+/* ====================== HELPERS ====================== */
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]];} return a; }
+function heartSVG(filled){
+  return `<svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 21s-7.5-4.9-10-9.2C.3 8.6 1.8 5 5.3 5c2 0 3.4 1.2 4.2 2.4C10.3 6.2 11.7 5 13.7 5 17.2 5 18.7 8.6 17 11.8 14.5 16.1 12 21 12 21z" fill="${filled?'#c8102e':'none'}" stroke="${filled?'#c8102e':'#6b7488'}" stroke-width="2"/></svg>`;
+}
+function heartsHTML(n){ let s=""; for(let i=0;i<2;i++) s+=heartSVG(i<n); return s; }
+function setLives(){ const h=heartsHTML(S.lives); $("ruLives").innerHTML=h; $("qLives").innerHTML=h; }
+function setWho(){ $("ruWho").textContent=S.name; $("qWho").textContent=S.name; }
+
+/* place wheel segment ICONS (no words, no emojis) */
+const SEG_ICONS = [
+  // RESULTADOS — pelota
+  `<svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7.6l3.1 2.3-1.2 3.7H9.9L8.7 9.9z" fill="#ffffff" stroke="none"/><path d="M12 3.2v4.2M4.7 9l3.4 1.1M19.3 9l-3.4 1.1M8 19.1l1.1-3.5M16 19.1l-1.1-3.5"/></svg>`,
+  // JUGADORES — camiseta
+  `<svg viewBox="0 0 24 24" fill="#ffffff"><path d="M9 3L4 6l2 3.6 2-1V21h8V8.6l2 1L20 6l-5-3a3 3 0 0 1-6 0z"/></svg>`,
+  // HISTORIA — copa
+  `<svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.6"><path d="M8 4h8v4.5a4 4 0 0 1-8 0z"/><path d="M8 5.5H5V7a3 3 0 0 0 3 3M16 5.5h3V7a3 3 0 0 1-3 3"/><path d="M9.4 20h5.2M9.7 20l.5-2.6h3.6l.5 2.6M12 12.5V17"/></svg>`,
+];
+(function placeIcons(){
+  const wheel=$("wheel");
+  for(let i=0;i<3;i++){
+    const ang=i*120+60; // centro del sector
+    const rad=ang*Math.PI/180, r=84;
+    const x=Math.sin(rad)*r, y=-Math.cos(rad)*r;
+    const el=document.createElement("div");
+    el.className="seg-ico";
+    el.innerHTML=SEG_ICONS[i];
+    el.style.transform=`translate(${x}px, ${y}px) translate(-50%,-50%)`;
+    wheel.appendChild(el);
+  }
+})();
+
+/* ====================== ROULETTE ====================== */
+function goRoulette(){
+  show("roulette"); setWho(); setLives();
+  $("spinResult").textContent="Girá para sortear la temática";
+  $("spinBtn").disabled=false;
+}
+function spin(){
+  $("spinBtn").disabled=true; Audio.spin();
+  const sector=(Math.random()*3)|0;          // 0=RES,1=JUG,2=HIS
+  const center=sector*120+60;
+  const jitter=(Math.random()*70-35);
+  const curMod=((S.wheelRot%360)+360)%360;
+  const need=(((360-center)-curMod)%360+360)%360;
+  S.wheelRot += 360*4 + need + jitter;
+  $("wheel").style.transform=`rotate(${S.wheelRot}deg)`;
+  setTimeout(()=>{
+    S.theme=THEME_ORDER[sector];
+    const names={RES:"RESULTADOS",JUG:"JUGADORES",HIS:"HISTORIA"};
+    $("spinResult").textContent="¡Tema: "+names[S.theme]+"!";
+    Audio.correct();
+    setTimeout(loadQuestion, 850);
+  }, 3200);
+}
+
+/* ====================== QUESTION SELECTION ====================== */
+function pickQuestion(theme, target){
+  let pool = BANK.filter(q=>q.t===theme && !S.used.has(q));
+  if(!pool.length) pool = BANK.filter(q=>!S.used.has(q));        // fallback any theme
+  if(!pool.length){ S.used.clear(); pool = BANK.filter(q=>q.t===theme); } // recycle
+  // choose nearest difficulty (with a little randomness among the closest)
+  pool.sort((a,b)=>Math.abs(a.d-target)-Math.abs(b.d-target));
+  const best=Math.abs(pool[0].d-target);
+  const tied=pool.filter(q=>Math.abs(q.d-target)===best);
+  const chosen=tied[(Math.random()*tied.length)|0];
+  S.used.add(chosen);
+  return chosen;
+}
+
+/* ====================== QUIZ ====================== */
+function loadQuestion(){
+  show("quiz"); setWho(); setLives();
+  const target=S.correct+1;                  // level we're attempting (1..9)
+  const q=pickQuestion(S.theme, target);
+  S.q=q; S.answered=false;
+  // build shuffled options keeping track of correct text
+  const correctText=q.o[0];
+  const opts=shuffle(q.o);
+  q._correctText=correctText; q._shuffled=opts;
+
+  $("qTheme").textContent=THEMES[q.t];
+  $("qNum").textContent="OBJETIVO · NIVEL "+target+" · "+LEVELS[target-1].toUpperCase();
+  $("qText").textContent=q.q;
+  $("qFeedback").textContent="";
+  $("qFeedback").style.color="";
+  $("fiftyBtn").disabled = !S.fifty;
+  $("fiftyBtn").textContent = S.fifty ? "SALVATAJE 50/50" : "50/50 USADO";
+
+  const box=$("qOptions"); box.innerHTML="";
+  const KI=["A","B","C","D"];
+  opts.forEach((text,i)=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.innerHTML=`<span class="ki">${KI[i]}</span><span>${text}</span>`;
+    b.onclick=()=>answer(b,text);
+    box.appendChild(b);
+  });
+  renderLadder();
+}
+
+function renderLadder(){
+  const list=$("ladderList"); list.innerHTML="";
+  LEVELS.forEach((name,i)=>{
+    const d=document.createElement("div");
+    const idx=i+1;
+    d.className="step"+(idx<=S.correct?" done":"")+(idx===S.correct+1?" cur":"");
+    d.innerHTML=`<span class="n">${idx<=S.correct?"✓":idx}</span><span>${name}</span>`;
+    list.appendChild(d);
+  });
+}
+
+function answer(btn, text){
+  if(S.answered) return;
+  S.answered=true;
+  const q=S.q;
+  const buttons=[...$("qOptions").children];
+  buttons.forEach(b=>b.disabled=true);
+  const isCorrect = text===q._correctText;
+
+  if(isCorrect){
+    btn.classList.add("correct");
+    Audio.correct();
+    $("qFeedback").style.color="#2faa55";
+    $("qFeedback").textContent="¡CORRECTO! ¡Aguante el Ciclón!";
+    S.correct++;
+    setLives();
+    setTimeout(()=>{
+      if(S.correct>=9){ winGame(); }
+      else { showLevelUp(()=> goRoulette()); }
+    }, 950);
+  } else {
+    btn.classList.add("wrong");
+    // reveal the correct one
+    buttons.forEach(b=>{ if(b.querySelector("span:last-child").textContent===q._correctText) b.classList.add("correct"); });
+    Audio.wrong();
+    S.lives--;
+    setLives();
+    $("qFeedback").style.color="#ffb4b4";
+    $("qFeedback").textContent="¡Uy! Era: "+q._correctText+"  (perdés una vida, esta no puntúa)";
+    setTimeout(()=>{
+      if(S.lives<=0){ loseGame(); }
+      else { goRoulette(); }
+    }, 1700);
+  }
+}
+
+function useFifty(){
+  if(!S.fifty || S.answered) return;
+  S.fifty=false;
+  $("fiftyBtn").disabled=true; $("fiftyBtn").textContent="50/50 USADO";
+  const q=S.q;
+  const buttons=[...$("qOptions").children];
+  const wrongs=buttons.filter(b=>b.querySelector("span:last-child").textContent!==q._correctText);
+  shuffle(wrongs).slice(0,2).forEach(b=>{ b.classList.add("dimmed"); b.disabled=true; });
+}
+
+/* ====================== LEVEL UP ====================== */
+function showLevelUp(then){
+  const name=LEVELS[S.correct-1];
+  $("luSmall").textContent="¡SUBISTE A NIVEL "+S.correct+"!";
+  $("luBig").textContent=name;
+  const lu=$("levelup"); lu.classList.add("on");
+  lu.querySelector(".lu").classList.remove("pulse"); void lu.offsetWidth; lu.querySelector(".lu").classList.add("pulse");
+  Audio.levelup();
+  setTimeout(()=>{ lu.classList.remove("on"); then&&then(); }, 1500);
+}
+
+/* ====================== END ====================== */
+function winGame(){
+  Audio.win(); confetti();
+  show("end");
+  $("endTitle").innerHTML="¡CAMPEÓN<br>DEL MUNDO!";
+  $("endTitle").style.color="var(--gold)";
+  $("endLevel").textContent="¡"+S.name+", llegaste a la cima!";
+  $("endStats").innerHTML=`Respondiste <b>9 preguntas</b> correctas y te quedaron <b>${S.lives}</b> vida(s).<br>De la reserva al título mundial. ¡Sos de Boedo de verdad!`;
+}
+function loseGame(){
+  Audio.lose();
+  show("end");
+  const reached = S.correct>=1 ? LEVELS[S.correct-1] : "Pibe de inferiores";
+  $("endTitle").innerHTML="SE TERMINÓ<br>EL PARTIDO";
+  $("endTitle").style.color="var(--rojo)";
+  $("endLevel").textContent="Nivel alcanzado: "+reached;
+  $("endStats").innerHTML=`${S.name}, sumaste <b>${S.correct}</b> respuesta(s) correcta(s) antes de quedarte sin vidas.<br>¡El hincha cuervo nunca afloja, dale revancha!`;
+}
+
+function confetti(){
+  const cols=["#0c2c6b","#c8102e","#eef1f6","#fff"];
+  for(let i=0;i<70;i++){
+    const c=document.createElement("div"); c.className="conf";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=cols[(Math.random()*cols.length)|0];
+    c.style.animationDuration=(2.5+Math.random()*2)+"s";
+    c.style.animationDelay=(Math.random()*0.6)+"s";
+    c.style.transform=`rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 5200);
+  }
+}
+
+/* ====================== DIPLOMA (canvas PNG) ====================== */
+function downloadDiploma(){
+  const win = S.correct>=9;
+  const reached = win ? "CAMPEÓN DEL MUNDO" : (S.correct>=1?LEVELS[S.correct-1]:"Pibe de inferiores");
+  const cv=document.createElement("canvas"); cv.width=1000; cv.height=720;
+  const x=cv.getContext("2d");
+  // bg
+  const g=x.createLinearGradient(0,0,0,720); g.addColorStop(0,"#0c2c6b"); g.addColorStop(1,"#071a44");
+  x.fillStyle=g; x.fillRect(0,0,1000,720);
+  // diagonal fileteado texture
+  x.strokeStyle="rgba(238,241,246,.10)"; x.lineWidth=2;
+  for(let i=-720;i<1000;i+=26){ x.beginPath(); x.moveTo(i,0); x.lineTo(i+720,720); x.stroke(); }
+  // red sash top
+  x.fillStyle="#c8102e"; x.fillRect(0,0,1000,14); x.fillRect(0,706,1000,14);
+  // gold frame
+  x.strokeStyle="#eef1f6"; x.lineWidth=6; x.strokeRect(34,34,932,652);
+  x.lineWidth=2; x.strokeStyle="rgba(238,241,246,.6)"; x.strokeRect(48,48,904,624);
+  // shield
+  drawShield(x,500,150,70);
+  // texts
+  x.textAlign="center"; x.fillStyle="#f6ecd2";
+  x.font="42px 'Yeseva One', serif";
+  x.fillText("DIPLOMA CUERVO", 500, 300);
+  x.fillStyle="#eef1f6"; x.font="22px 'Bebas Neue', sans-serif";
+  x.fillText("CLUB ATLÉTICO SAN LORENZO DE ALMAGRO", 500, 332);
+  x.fillStyle="#dfe6ff"; x.font="24px 'Oswald', sans-serif";
+  x.fillText("Se reconoce a", 500, 392);
+  x.fillStyle="#fff"; x.font="46px 'Yeseva One', serif";
+  x.fillText(S.name, 500, 446);
+  x.fillStyle="#dfe6ff"; x.font="24px 'Oswald', sans-serif";
+  x.fillText(win?"por consagrarse en la Trivia Cuerva como":"que alcanzó en la Trivia Cuerva el nivel de", 500, 496);
+  // level banner
+  x.fillStyle="#c8102e"; roundRect(x,250,520,500,64,14); x.fill();
+  x.strokeStyle="#eef1f6"; x.lineWidth=3; roundRect(x,250,520,500,64,14); x.stroke();
+  x.fillStyle="#fff"; x.font="34px 'Bebas Neue', sans-serif";
+  x.fillText(reached.toUpperCase(), 500, 562);
+  // footer
+  x.fillStyle="#bcc6ee"; x.font="18px 'Oswald', sans-serif";
+  const d=new Date();
+  x.fillText(`Aciertos: ${S.correct}/9  ·  Vidas restantes: ${S.lives}  ·  ${d.toLocaleDateString('es-AR')}`, 500, 636);
+  x.fillStyle="#eef1f6"; x.font="20px 'Pacifico', cursive";
+  x.fillText("¡Aguante el Ciclón de Boedo!", 500, 668);
+
+  cv.toBlob(blob=>{
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=`diploma-cuervo-${S.name.replace(/\s+/g,'_')}.png`;
+    a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+  });
+}
+function roundRect(x,X,Y,w,h,r){ x.beginPath(); x.moveTo(X+r,Y); x.arcTo(X+w,Y,X+w,Y+h,r); x.arcTo(X+w,Y+h,X,Y+h,r); x.arcTo(X,Y+h,X,Y,r); x.arcTo(X,Y,X+w,Y,r); x.closePath(); }
+function drawShield(x,cx,cy,s){
+  x.save(); x.translate(cx-s/2, cy-s*0.5); const w=s, h=s*1.14;
+  x.beginPath();
+  x.moveTo(w*.5,0); x.lineTo(w,w*.14); x.lineTo(w,h*.52);
+  x.bezierCurveTo(w,h*.78,w*.74,h*.93,w*.5,h);
+  x.bezierCurveTo(w*.26,h*.93,0,h*.78,0,h*.52); x.lineTo(0,w*.14); x.closePath();
+  x.fillStyle="#0c2c6b"; x.fill();
+  // red right half
+  x.save(); x.clip();
+  x.fillStyle="#c8102e"; x.beginPath(); x.moveTo(w*.5,0); x.lineTo(w,w*.14); x.lineTo(w,h); x.lineTo(w*.5,h); x.closePath(); x.fill();
+  x.restore();
+  x.lineWidth=4; x.strokeStyle="#eef1f6"; x.stroke();
+  x.fillStyle="#f6ecd2"; x.font="bold "+(s*0.42)+"px 'Bebas Neue', sans-serif"; x.textAlign="center"; x.textBaseline="middle";
+  x.fillText("SL", w*.5, h*.52);
+  x.restore(); x.textBaseline="alphabetic";
+}
+
+/* ====================== WIRING ====================== */
+function startGame(){
+  const name=$("pname").value.trim() || "Hincha";
+  S=fresh(name);
+  $("wheel").style.transition="none"; $("wheel").style.transform="rotate(0deg)";
+  void $("wheel").offsetWidth; $("wheel").style.transition="";
+  Audio.startMusic();
+  goRoulette();
+}
+
+document.body.addEventListener("click", ()=>{ if(Audio.isOn()) Audio.startMusic(); }, {once:true});
+$("startBtn").onclick=startGame;
+$("spinBtn").onclick=spin;
+$("fiftyBtn").onclick=useFifty;
+$("downloadBtn").onclick=downloadDiploma;
+$("againBtn").onclick=()=>{ show("home"); $("pname").focus(); };
+$("muteBtn").onclick=()=>{ const on=Audio.toggle(); $("muteBtn").textContent= on?"TANGO: ON":"TANGO: OFF"; };
+$("pname").addEventListener("keydown", e=>{ if(e.key==="Enter") startGame(); });
+
+})();
+</script>
+</body>
+</html>
