@@ -11,7 +11,7 @@
 ![Canvas API](https://img.shields.io/badge/Canvas_API-diploma_PNG-0C2C6B)
 ![Sin dependencias](https://img.shields.io/badge/dependencias-0-2FAA55)
 
-[**Jugar ahora**](https://gastonpaez.github.io/Trivia_SL/) · [Reportar un problema](https://github.com/GastonPaez/Trivia_SL/issues)
+[**Jugar ahora**]([https://gastonpaez.github.io/Trivia_SL](https://trivia-sl.vercel.app/)/) · [Reportar un problema](https://github.com/GastonPaez/Trivia_SL/issues)
 
 </div>
 
