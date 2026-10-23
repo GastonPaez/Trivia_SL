@@ -2,7 +2,7 @@
 
 # 🔵🔴 Trivia Cuerva · San Lorenzo de Almagro
 
-**Juego de preguntas y respuestas sobre el Ciclón de Boedo: girá la ruleta, respondé y escalá de la reserva hasta ser Campeón del Mundo.**
+**Juego de preguntas y respuestas sobre el Ciclón: girá la ruleta, respondé y escalá de la reserva hasta ser Campeón del Mundo.**
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
@@ -128,7 +128,5 @@ Temáticas disponibles: `RES` (Resultados), `JUG` (Jugadores) e `HIS` (Historia)
 [![GitHub](https://img.shields.io/badge/GitHub-GastonPaez-181717?logo=github)](https://github.com/GastonPaez)
 
 <div align="center">
-
-*¡Aguante el Ciclón de Boedo!* 💙❤️
-
+💙❤️
 </div>
